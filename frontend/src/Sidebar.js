@@ -21,15 +21,15 @@ const Sidebar = () => {
 const styles = {
     sidebar: {
         position: 'fixed',
-        top: '60px', // Starts below the top bar
+        top: '50px', // Moves the sidebar slightly higher (adjust as needed)
         left: 0,
-        height: 'calc(100% - 60px)', // Accounts for the top bar height
+        height: 'calc(100% - 50px)', // Adjusts height to match the new top position
         width: '200px',
         backgroundColor: '#1c1c1c', // Matte black
         color: 'white',
         padding: '20px',
         boxShadow: '2px 0 5px rgba(0, 0, 0, 0.5)',
-        zIndex: 999, // Ensure it's above the main content but below the top bar
+        zIndex: 999, // Stays above main content but below the navbar
     },
     title: {
         fontSize: '20px',
@@ -47,6 +47,5 @@ const styles = {
         textAlign: 'left',
     },
 };
-
 
 export default Sidebar;
