@@ -11,6 +11,10 @@ function App() {
   const [accessToken, setAccessToken] = useState("");
   const [albums, setAlbums] = useState([]);
 
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedArtists, setSelectedArtist] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+
 useEffect(() => {
   // API Access Token
   const auth = btoa(CLIENT_ID + ":" + CLIENT_SECRET);
@@ -30,9 +34,33 @@ useEffect(() => {
     .catch(error => console.error("Token Error:", error));
 }, []);
 
+useEffect(() => {
+  const delayDebounceFn = setTimeout(() => {
+    if (searchInput.length > 0) {
+      fetch(`https://api.spotify.com/v1/search?q=${searchInput}&type=artist&limit=5`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + accessToken
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.artists && data.artists.items) {
+            setSuggestions(data.artists.items);
+          }
+        });
+  } else {
+    setSuggestions([]);
+  }
+  }, 300);
+
+  return () => clearTimeout(delayDebounceFn);
+}, [searchInput, accessToken]);
+
   // Search
-  async function search() {
-    console.log("Search for " + searchInput);
+  async function search(artistID) {
+    if (!artistID) return;
+    setSuggestions([]);
 
     // Get request using search to get artist ID
     var searchParameters = {
@@ -62,18 +90,50 @@ useEffect(() => {
         <InputGroup className="mb-3" size="lg">
           <FormControl
             placeholder="Search For Artist"
-            type="input"
-            onKeyPress={event => {
-              if (event.key == "Enter") {
-                search();
-              }
+            value={searchInput}
+            onChange={event => {
+              setSearchInput(event.target.value);
+              setSelectedArtist(null);
             }}
-            onChange={event => setSearchInput(event.target.value)}
+            onFocus={() => setShowSuggestions(true)} 
+            onKeyDown={event => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                const artistToSearch = selectedArtists || suggestions[0];
+                if (artistToSearch) {
+                  setSelectedArtist(artistToSearch);
+                  setSearchInput(artistToSearch.name);
+                  setSuggestions([]);
+                  setShowSuggestions(false);
+                  search(artistToSearch.id);
+                }
+            }
+          }}
           />
-          <Button onClick={search}>
+          <Button onClick={() => selectedArtist && search(selectedArtist.id)}>
             Search
           </Button>
         </InputGroup>
+
+        {suggestions.length > 0 && showSuggestions && (
+          <div className="position-absolute bg-white border w-100 rounded shadow-sm" style={{ zIndex: 1000 }}>
+            {suggestions.map(artist => (
+              <div
+                key={artist.id}
+                onClick={() => {
+                  setSelectedArtist(artist);
+                  setSearchInput(artist.name);
+                  setSuggestions([]);
+                  search(artist.id);
+                }}
+                className="p-2 hover-bg-light border-bottom"
+                style={{ cursor: 'pointer' }}
+              >
+                {artist.name}
+              </div>
+            ))}
+          </div>
+        )}
       </Container>
       
       <Container>
@@ -82,7 +142,7 @@ useEffect(() => {
             console.log(album);
             return (
               <Card>
-                <Card.Img src={album.images[0].url} />
+                <Card.Img src={album.images[0]?.url} />
                 <Card.Body>
                   <Card.Title>{album.name}</Card.Title>
                 </Card.Body>
