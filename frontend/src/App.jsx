@@ -1,6 +1,6 @@
-import './App.css'
+import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-bootstrap'; 
+import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 
 const CLIENT_ID = "3bc2dd711ea543b0b9c038e4ecea46fd";
@@ -12,145 +12,165 @@ function App() {
   const [albums, setAlbums] = useState([]);
 
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedArtists, setSelectedArtist] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-useEffect(() => {
-  // API Access Token
-  const auth = btoa(CLIENT_ID + ":" + CLIENT_SECRET);
-
-  fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + auth,
-    },
-    body: 'grant_type=client_credentials',
-  })
-    .then(response => response.json())
-    .then(data => {
-      setAccessToken(data.access_token);
+  useEffect(() => {
+    const auth = btoa(CLIENT_ID + ":" + CLIENT_SECRET);
+    fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + auth,
+      },
+      body: 'grant_type=client_credentials',
     })
-    .catch(error => console.error("Token Error:", error));
-}, []);
+      .then(response => response.json())
+      .then(data => setAccessToken(data.access_token))
+      .catch(error => console.error("Token Error:", error));
+  }, []);
 
-useEffect(() => {
-  const delayDebounceFn = setTimeout(() => {
-    if (searchInput.length > 0) {
-      fetch(`https://api.spotify.com/v1/search?q=${searchInput}&type=artist&limit=5`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + accessToken
-        }
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.artists && data.artists.items) {
-            setSuggestions(data.artists.items);
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchInput.length > 0 && accessToken) {
+        fetch(`https://api.spotify.com/v1/search?q=${searchInput}&type=track&limit=5`, {
+          headers: {
+            'Authorization': 'Bearer ' + accessToken
           }
-        });
-  } else {
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.tracks && data.tracks.items) {
+              setSuggestions(data.tracks.items);
+              setShowSuggestions(true);
+            }
+          });
+      } else {
+        setSuggestions([]);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [searchInput, accessToken]);
+
+  async function search(trackID) {
+    if (!trackID) return;
+
     setSuggestions([]);
-  }
-  }, 300);
+    setShowSuggestions(false);
 
-  return () => clearTimeout(delayDebounceFn);
-}, [searchInput, accessToken]);
-
-  // Search
-  async function search(artistID) {
-    if (!artistID) return;
-    setSuggestions([]);
-
-    // Get request using search to get artist ID
-    var searchParameters = {
+    const searchHeaders = {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + accessToken
       }
-    }
-    var artistID = await fetch('https://api.spotify.com/v1/search?q=' + searchInput + '&type=artist' , searchParameters)
-      .then(response => response.json())
-      .then(data => { return data.artists.items[0].id })
+    };
 
-    console.log("Artist ID is " + artistID);
-    
-    var returnedAlbums = await fetch('https://api.spotify.com/v1/artists/' + artistID + '/albums' + '?include_groups=album&market=US&limit=50', searchParameters)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        setAlbums(data.items);
-      })
+    const trackInfo = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, searchHeaders)
+      .then(res => res.json());
+
+    setSelectedTrack(trackInfo);
+
+    const artistID = trackInfo.artists[0].id;
+
+    const albumsData = await fetch(`https://api.spotify.com/v1/artists/${artistID}/albums?include_groups=album&market=US&limit=50`, searchHeaders)
+      .then(res => res.json());
+
+    setAlbums(albumsData.items);
   }
-  console.log(albums);
+
   return (
     <div className="App">
       <Container>
+        {selectedTrack && (
+          <Card className="mb-3">
+            <Row className="g-0">
+              <div className="col-md-4">
+                <Card.Img
+                  src={selectedTrack.album.images[0]?.url}
+                  alt="Track Cover"
+                  style={{ height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+              <div className="col-md-8 d-flex align-items-center">
+                <Card.Body>
+                  <Card.Title>{selectedTrack.name}</Card.Title>
+                  <Card.Text>
+                    <strong>Artists:</strong>{" "}
+                    {selectedTrack.artists.map(artist => artist.name).join(', ')}<br />
+                    <strong>Runtime:</strong>{" "}
+                    {Math.floor(selectedTrack.duration_ms / 60000)}:
+                    {(Math.floor(selectedTrack.duration_ms / 1000) % 60).toString().padStart(2, '0')} minutes
+                  </Card.Text>
+                </Card.Body>
+              </div>
+            </Row>
+          </Card>
+        )}
+
         <InputGroup className="mb-3" size="lg">
           <FormControl
-            placeholder="Search For Artist"
+            placeholder="Search For Song"
             value={searchInput}
             onChange={event => {
               setSearchInput(event.target.value);
-              setSelectedArtist(null);
+              setSelectedTrack(null);
             }}
-            onFocus={() => setShowSuggestions(true)} 
+            onFocus={() => setShowSuggestions(true)}
             onKeyDown={event => {
               if (event.key === 'Enter') {
                 event.preventDefault();
-                const artistToSearch = selectedArtists || suggestions[0];
-                if (artistToSearch) {
-                  setSelectedArtist(artistToSearch);
-                  setSearchInput(artistToSearch.name);
-                  setSuggestions([]);
+                const topSuggestion = suggestions[0];
+                if (topSuggestion) {
+                  setSearchInput(topSuggestion.name);
+                  setSelectedTrack(topSuggestion);
+                  search(topSuggestion.id);
                   setShowSuggestions(false);
-                  search(artistToSearch.id);
                 }
-            }
-          }}
+              }
+            }}
           />
-          <Button onClick={() => selectedArtist && search(selectedArtist.id)}>
+          <Button onClick={() => selectedTrack && search(selectedTrack.id)}>
             Search
           </Button>
         </InputGroup>
 
         {suggestions.length > 0 && showSuggestions && (
           <div className="position-absolute bg-white border w-100 rounded shadow-sm" style={{ zIndex: 1000 }}>
-            {suggestions.map(artist => (
+            {suggestions.map(track => (
               <div
-                key={artist.id}
+                key={track.id}
                 onClick={() => {
-                  setSelectedArtist(artist);
-                  setSearchInput(artist.name);
+                  setSelectedTrack(track);
+                  setSearchInput(track.name);
                   setSuggestions([]);
-                  search(artist.id);
+                  setShowSuggestions(false);
+                  search(track.id);
                 }}
                 className="p-2 hover-bg-light border-bottom"
                 style={{ cursor: 'pointer' }}
               >
-                {artist.name}
+                {track.name} - {track.artists[0].name}
               </div>
             ))}
           </div>
         )}
       </Container>
-      
+
+    {selectedTrack && albums.length > 0 && (
       <Container>
+        <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
         <Row className="mx-2 row row-cols-4">
-          {albums.map( (album, i) => {
-            console.log(album);
-            return (
-              <Card>
-                <Card.Img src={album.images[0]?.url} />
-                <Card.Body>
-                  <Card.Title>{album.name}</Card.Title>
-                </Card.Body>
-              </Card>
-            )
-          })}
+          {albums.map((album, i) => (
+            <Card key={album.id || i} className="m-2">
+              <Card.Img src={album.images[0]?.url} />
+              <Card.Body>
+                <Card.Title>{album.name}</Card.Title>
+              </Card.Body>
+            </Card>
+          ))}
         </Row>
       </Container>
+    )}
     </div>
   );
 }
