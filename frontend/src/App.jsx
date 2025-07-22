@@ -1,6 +1,6 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-bootstrap';
+import { Container, InputGroup, FormControl, Button, Row, Col, Card } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 
 const CLIENT_ID = "3bc2dd711ea543b0b9c038e4ecea46fd";
@@ -9,7 +9,7 @@ const CLIENT_SECRET = "af7bdcd41b5645549c6abeace0503288";
 function App() {
   const [searchInput, setSearchInput] = useState("");
   const [accessToken, setAccessToken] = useState("");
-  const [albums, setAlbums] = useState([]);
+  const [topTracks, setTracks] = useState([]);
 
   const [suggestions, setSuggestions] = useState([]);
   const [selectedTrack, setSelectedTrack] = useState(null);
@@ -72,10 +72,10 @@ function App() {
 
     const artistID = trackInfo.artists[0].id;
 
-    const albumsData = await fetch(`https://api.spotify.com/v1/artists/${artistID}/albums?include_groups=album&market=US&limit=50`, searchHeaders)
+    const topTracksData = await fetch(`https://api.spotify.com/v1/artists/${artistID}/top-tracks?market=US`, searchHeaders)
       .then(res => res.json());
 
-    setAlbums(albumsData.items);
+    setTracks(topTracksData.tracks);
   }
 
   return (
@@ -156,15 +156,15 @@ function App() {
         )}
       </Container>
 
-    {selectedTrack && albums.length > 0 && (
+    {selectedTrack && topTracks.length > 0 && (
       <Container>
         <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
-        <Row className="mx-2 row row-cols-4">
-          {albums.map((album, i) => (
-            <Card key={album.id || i} className="m-2">
-              <Card.Img src={album.images[0]?.url} />
+        <Row className="mx-2 row-cols-4 g-3">
+          {topTracks.slice(0,8).map((track, i) => (
+            <Card key={track.id || i} className="m-2">
+              <Card.Img src={track.album.images[0]?.url} />
               <Card.Body>
-                <Card.Title>{album.name}</Card.Title>
+                <Card.Title>{track.name}</Card.Title>
               </Card.Body>
             </Card>
           ))}
