@@ -11,8 +11,11 @@ function App() {
   return (
     <div className="App">
       <Container className="d-flex justify-content-end mt-3">
-        <Button variant="outline-primary" onClick={() => navigate('/calendar')}>
+        <Button variant="outline-primary" onClick={() => navigate("/calendar")}>
           View Calendar
+        </Button>
+        <Button variant="outline-primary" onClick={() => navigate("/")}>
+         Song Select
         </Button>
       </Container>
 
