@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Button } from 'react-bootstrap';
 import CalendarPage from './CalendarPage';
 import SongSelect from './SongSelect';
+import Login from './Login';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
       <Routes>
         <Route path="/" element={<SongSelect />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </div>
   );

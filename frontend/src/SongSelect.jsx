@@ -2,12 +2,15 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, InputGroup, FormControl, Button, Row, Col, Card } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 const CLIENT_ID = "3bc2dd711ea543b0b9c038e4ecea46fd";
 const CLIENT_SECRET = "af7bdcd41b5645549c6abeace0503288";
 
 function SongSelect() {
+  const navigate = useNavigate();
+  
   const [searchInput, setSearchInput] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [topTracks, setTracks] = useState([]);
@@ -81,6 +84,11 @@ function SongSelect() {
 
   return (
     <div className="App">
+      <Container className="d-flex justify-content-end mt-3">
+        <Button variant="outline-primary" onClick={() => navigate("/login")}>
+          Logout
+        </Button>
+      </Container>
       <Container>
         {selectedTrack && (
           <Card className="mb-3">
