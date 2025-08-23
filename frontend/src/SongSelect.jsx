@@ -4,10 +4,6 @@ import { Container, InputGroup, FormControl, Button, Row, Col, Card } from 'reac
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
-const CLIENT_ID = "3bc2dd711ea543b0b9c038e4ecea46fd";
-const CLIENT_SECRET = "af7bdcd41b5645549c6abeace0503288";
-
 function SongSelect() {
   const navigate = useNavigate();
   
@@ -20,18 +16,16 @@ function SongSelect() {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
-    const auth = btoa(CLIENT_ID + ":" + CLIENT_SECRET);
-    fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + auth,
-      },
-      body: 'grant_type=client_credentials',
-    })
+    fetch('http://localhost:5000/api/spotify-token')
       .then(response => response.json())
-      .then(data => setAccessToken(data.access_token))
-      .catch(error => console.error("Token Error:", error));
+      .then(data => {
+        if (data.access_token) {
+          setAccessToken(data.access_token);
+        } else {
+          console.error("Failed to fetch Spotify token:", data.error);
+        }
+      })
+      .catch(error => console.error("Error fetching Spotify token:", error));
   }, []);
 
   useEffect(() => {
