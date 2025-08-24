@@ -17,6 +17,9 @@ function Login() {
         setPassword(event.target.value);
     };
     
+    const handleSpotifyLogin = () => {
+        window.location.href = "http://localhost:5000/splogin"
+    };
 
     return (
         <div>
@@ -39,6 +42,12 @@ function Login() {
             <Container className="d-flex justify-content-end mt-3">
                 <Button variant="outline-primary" onClick={() => navigate("/")}>
                 Login
+                </Button>
+            </Container>
+
+            <Container className="d-flex justify-content-end mt-3">
+                <Button variant="success" onClick={handleSpotifyLogin}>
+                    Login with Spotify
                 </Button>
             </Container>
         </div>
