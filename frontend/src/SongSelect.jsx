@@ -74,6 +74,8 @@ function SongSelect() {
       .then(res => res.json());
 
     setTracks(topTracksData.tracks);
+
+    navigate('/calendar', { state: { selectedTrack: trackInfo } });
   }
 
   return (

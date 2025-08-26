@@ -72,7 +72,7 @@ def callback():
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
         
-        return redirect('http://localhost:5173/calendar')
+        return redirect('http://localhost:5173/')
 
 if __name__ == "__main__":
     app.run(debug=True)

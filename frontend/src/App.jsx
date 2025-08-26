@@ -11,7 +11,7 @@ function App() {
 
   return (
     <div className="App">
-      <Container className="d-flex justify-content-end mt-3">
+      <Container className="d-flex justify-content-end mt-3" style={{maxWidth: '1920px'}}>
         <Button variant="outline-primary" onClick={() => navigate("/calendar")}>
           View Calendar
         </Button>
