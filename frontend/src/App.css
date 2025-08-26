@@ -8,6 +8,7 @@
   transform-origin: top center;
   transform: scale(calc(min(100vw / 1920, 100vh / 1080)));
   overflow: hidden;
+  background-color: #191414;
 }
 
 .container {
@@ -15,6 +16,7 @@
   max-height: 1080px;
   padding: 0 15px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .d-flex {
@@ -29,7 +31,19 @@
 }
 
 .position-absolute {
+  width: 100%;
+  max-width: none;
+  z-index: 1000;
+}
+
+.input-group {
   max-width: 100%;
+  position: relative;
+}
+
+.position-absolute.bg-white.border.rounded.shadow-sm {
+  max-width: 98%;
+  top: calc(100% + 5px);
 }
 
 .card, .row {

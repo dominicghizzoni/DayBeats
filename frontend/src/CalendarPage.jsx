@@ -1,3 +1,4 @@
+import './CalendarPage.css';
 import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -53,7 +54,7 @@ function CalendarPage() {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center mt-4">
+    <div className="d-flex flex-column align-items-center mt-5">
       <h2>Calendar</h2>
       <Calendar
         onChange={setValue}
