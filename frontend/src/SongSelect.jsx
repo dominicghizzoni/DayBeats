@@ -1,4 +1,5 @@
-import './App.css';
+import './styles/App.css';
+import './styles/SongSelect.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, InputGroup, FormControl, Button, Row, Col, Card } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
@@ -114,6 +115,7 @@ function SongSelect() {
 
         <InputGroup className="mb-3" size="lg">
           <FormControl
+            className='search-bar'
             placeholder="Search For Song"
             value={searchInput}
             onChange={event => {
@@ -134,7 +136,7 @@ function SongSelect() {
               }
             }}
           />
-          <Button onClick={() => selectedTrack && search(selectedTrack.id)}>
+          <Button className="search-btn" onClick={() => selectedTrack && search(selectedTrack.id)}>
             Search
           </Button>
         </InputGroup>

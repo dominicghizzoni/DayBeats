@@ -1,4 +1,4 @@
-import './CalendarPage.css';
+import './styles/CalendarPage.css';
 import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';

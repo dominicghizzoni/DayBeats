@@ -1,0 +1,21 @@
+.search-btn {
+    background-color: #1db954;
+    color: #191414;
+    border: none;
+}
+
+.search-btn:hover {
+    transform: scale(1.1);
+    background-color: #1db954;
+    color: #191414;
+    border: none;
+}
+
+.search-bar {
+    background-color: #191414;
+    color: #b3b3b3;
+}
+
+.search-bar::placeholder {
+  color: #b3b3b3;
+}
