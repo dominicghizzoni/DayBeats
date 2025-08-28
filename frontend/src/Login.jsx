@@ -1,4 +1,5 @@
 import "./styles/App.css"
+import "./styles/Login.css"
 import { useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -45,8 +46,8 @@ function Login() {
                 </Button>
             </Container>
 
-            <Container className="d-flex justify-content-end mt-3">
-                <Button variant="success" onClick={handleSpotifyLogin}>
+            <Container className="d-flex justify-content-center mt-3">
+                <Button className="login-btn" onClick={handleSpotifyLogin}>
                     Login with Spotify
                 </Button>
             </Container>

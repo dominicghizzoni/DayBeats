@@ -41,10 +41,6 @@ function CalendarPage() {
         )
       }
 
-
-
-
-
       const match = events.find(e => e.date === dateStr);
       if (match) {
         return <p style={{ fontSize: '0.6rem', color: 'blue' }}>{match.title}</p>;

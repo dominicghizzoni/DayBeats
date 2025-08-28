@@ -76,7 +76,10 @@ function SongSelect() {
 
     setTracks(topTracksData.tracks);
 
-    navigate('/calendar', { state: { selectedTrack: trackInfo } });
+  }
+
+  function handle(track) {
+    navigate("/calendar", {state: { selectedTrack: track }})
   }
 
   return (
@@ -107,6 +110,11 @@ function SongSelect() {
                     {Math.floor(selectedTrack.duration_ms / 60000)}:
                     {(Math.floor(selectedTrack.duration_ms / 1000) % 60).toString().padStart(2, '0')} minutes
                   </Card.Text>
+
+                  <Button className="select-btn" onClick={() => handle(selectedTrack)}>
+                    Select
+                  </Button>
+                  
                 </Card.Body>
               </div>
             </Row>

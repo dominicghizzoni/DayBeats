@@ -6,7 +6,20 @@
 
 .search-btn:hover {
     transform: scale(1.1);
+    background-color: #32df6f;
+    color: #191414;
+    border: none;
+}
+
+.select-btn {
     background-color: #1db954;
+    color: #191414;
+    border: none;
+}
+
+.select-btn:hover {
+    transform: scale(1.1);
+    background-color: #32df6f;
     color: #191414;
     border: none;
 }
