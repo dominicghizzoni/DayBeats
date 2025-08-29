@@ -1,5 +1,5 @@
 import './styles/App.css';
-import './styles/SongSelect.css'
+import './styles/SongSelect.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, InputGroup, FormControl, Button, Row, Col, Card } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
@@ -7,49 +7,51 @@ import { useNavigate } from 'react-router-dom';
 
 function SongSelect() {
   const navigate = useNavigate();
-  
   const [searchInput, setSearchInput] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [topTracks, setTracks] = useState([]);
-
   const [suggestions, setSuggestions] = useState([]);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/spotify-token')
-      .then(response => response.json())
-      .then(data => {
-        if (data.access_token) {
-          setAccessToken(data.access_token);
-        } else {
-          console.error("Failed to fetch Spotify token:", data.error);
-        }
-      })
-      .catch(error => console.error("Error fetching Spotify token:", error));
-  }, []);
+    const token = localStorage.getItem('spotifyToken');
+    if (token) {
+      setAccessToken(token);
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (searchInput.length > 0 && accessToken) {
-        fetch(`https://api.spotify.com/v1/search?q=${searchInput}&type=track&limit=5`, {
+        fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchInput)}&type=track&limit=5`, {
           headers: {
             'Authorization': 'Bearer ' + accessToken
           }
         })
-          .then(res => res.json())
+          .then(response => {
+            if (response.status === 401) {
+              localStorage.removeItem('spotifyToken');
+              navigate('/login');
+              return Promise.reject('Unauthorized');
+            }
+            return response.json();
+          })
           .then(data => {
             if (data.tracks && data.tracks.items) {
               setSuggestions(data.tracks.items);
               setShowSuggestions(true);
             }
-          });
+          })
+          .catch(error => console.error('Error searching tracks:', error));
       } else {
         setSuggestions([]);
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchInput, accessToken]);
+  }, [searchInput, accessToken, navigate]);
 
   async function search(trackID) {
     if (!trackID) return;
@@ -64,22 +66,39 @@ function SongSelect() {
       }
     };
 
-    const trackInfo = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, searchHeaders)
-      .then(res => res.json());
+    try {
+      const trackInfo = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, searchHeaders)
+        .then(res => {
+          if (res.status === 401) {
+            localStorage.removeItem('spotifyToken');
+            navigate('/login');
+            return Promise.reject('Unauthorized');
+          }
+          return res.json();
+        });
 
-    setSelectedTrack(trackInfo);
+      setSelectedTrack(trackInfo);
 
-    const artistID = trackInfo.artists[0].id;
+      const artistID = trackInfo.artists[0].id;
 
-    const topTracksData = await fetch(`https://api.spotify.com/v1/artists/${artistID}/top-tracks?market=US`, searchHeaders)
-      .then(res => res.json());
+      const topTracksData = await fetch(`https://api.spotify.com/v1/artists/${artistID}/top-tracks?market=US`, searchHeaders)
+        .then(res => {
+          if (res.status === 401) {
+            localStorage.removeItem('spotifyToken');
+            navigate('/login');
+            return Promise.reject('Unauthorized');
+          }
+          return res.json();
+        });
 
-    setTracks(topTracksData.tracks);
-
+      setTracks(topTracksData.tracks);
+    } catch (error) {
+      console.error('Error fetching track or top tracks:', error);
+    }
   }
 
   function handle(track) {
-    navigate("/calendar", {state: { selectedTrack: track }})
+    navigate("/calendar", { state: { selectedTrack: track } });
   }
 
   return (
@@ -88,14 +107,14 @@ function SongSelect() {
         {selectedTrack && (
           <Card className="mb-3">
             <Row className="g-0">
-              <div className="col-md-4">
+              <Col md={4}>
                 <Card.Img
                   src={selectedTrack.album.images[0]?.url}
                   alt="Track Cover"
                   style={{ height: '100%', objectFit: 'cover' }}
                 />
-              </div>
-              <div className="col-md-8 d-flex align-items-center">
+              </Col>
+              <Col md={8} className="d-flex align-items-center">
                 <Card.Body>
                   <Card.Title>{selectedTrack.name}</Card.Title>
                   <Card.Text>
@@ -105,20 +124,18 @@ function SongSelect() {
                     {Math.floor(selectedTrack.duration_ms / 60000)}:
                     {(Math.floor(selectedTrack.duration_ms / 1000) % 60).toString().padStart(2, '0')} minutes
                   </Card.Text>
-
                   <Button className="select-btn" onClick={() => handle(selectedTrack)}>
                     Select
                   </Button>
-                  
                 </Card.Body>
-              </div>
+              </Col>
             </Row>
           </Card>
         )}
 
         <InputGroup className="mb-3" size="lg">
           <FormControl
-            className='search-bar'
+            className="search-bar"
             placeholder="Search For Song"
             value={searchInput}
             onChange={event => {
@@ -166,23 +183,23 @@ function SongSelect() {
         )}
       </Container>
 
-    {selectedTrack && topTracks.length > 0 && (
-      <Container>
-        <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
-        <Row className="mx-2 row-cols-4 g-3">
-          {topTracks.slice(0,8).map((track, i) => (
-            <Card key={track.id || i} className="m-2">
-              <Card.Img src={track.album.images[0]?.url} />
-              <Card.Body>
-                <Card.Title>{track.name}</Card.Title>
-              </Card.Body>
-            </Card>
-          ))}
-        </Row>
-      </Container>
-    )}
+      {selectedTrack && topTracks.length > 0 && (
+        <Container>
+          <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
+          <Row className="mx-2 row-cols-4 g-3">
+            {topTracks.slice(0, 8).map((track, i) => (
+              <Card key={track.id || i} className="m-2">
+                <Card.Img src={track.album.images[0]?.url} />
+                <Card.Body>
+                  <Card.Title>{track.name}</Card.Title>
+                </Card.Body>
+              </Card>
+            ))}
+          </Row>
+        </Container>
+      )}
     </div>
   );
 }
 
-export default SongSelect
+export default SongSelect;

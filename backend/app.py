@@ -9,7 +9,7 @@ import urllib.parse
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "your-secure-random-string-here")
-CORS(app) 
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}) 
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
