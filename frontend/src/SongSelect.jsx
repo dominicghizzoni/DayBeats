@@ -84,11 +84,6 @@ function SongSelect() {
 
   return (
     <div className="App">
-      <Container className="d-flex justify-content-end mt-3">
-        <Button variant="outline-primary" onClick={() => navigate("/login")}>
-          Logout
-        </Button>
-      </Container>
       <Container>
         {selectedTrack && (
           <Card className="mb-3">

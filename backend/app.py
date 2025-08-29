@@ -54,7 +54,7 @@ def splogin():
 @app.route('/callback')
 def callback():
     if 'error' in request.args:
-        return jsonify({"error": request.args['error']})
+        return redirect('http://localhost:5173/login?error=' + urllib.parse.quote(request.args['error']))
     
     if 'code' in request.args:
         req_body = {
@@ -68,11 +68,27 @@ def callback():
         response = requests.post(TOKEN_URL, data=req_body)
         token_info = response.json()
 
-        session['access_token'] = token_info['access_token']
-        session['refresh_token'] = token_info['refresh_token']
-        session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
-        
-        return redirect('http://localhost:5173/')
+        if 'access_token' in token_info:
+            access_token = token_info['access_token']
+            session['access_token'] = access_token
+            session['refresh_token'] = token_info.get('refresh_token')
+            session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
+            return redirect(f'http://localhost:5173/callback?token={access_token}')
+        else:
+            return redirect('http://localhost:5173/login?error=failed_to_get_token')
+
+    return redirect('http://localhost:5173/login?error=no_code')
+
+@app.route('/verify-token', methods=['POST'])
+def verify_token():
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token:
+        return jsonify({'valid': False}), 401
+    response = requests.get(
+        'https://api.spotify.com/v1/me',
+        headers={'Authorization': f'Bearer {token}'}
+    )
+    return jsonify({'valid': response.status_code == 200})
 
 if __name__ == "__main__":
     app.run(debug=True)
