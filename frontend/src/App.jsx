@@ -1,16 +1,17 @@
 import './styles/App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Button, Navbar } from 'react-bootstrap';
+import { Container, Button, Navbar, Image } from 'react-bootstrap'; // Add Image import
 import CalendarPage from './CalendarPage';
 import SongSelect from './SongSelect';
 import Login from './Login';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('spotifyToken');
@@ -23,6 +24,25 @@ function App() {
         .then(data => {
           if (data.valid) {
             setIsLoggedIn(true);
+            fetch('https://api.spotify.com/v1/me', {
+              headers: { 'Authorization': `Bearer ${token}` },
+            })
+              .then(response => {
+                if (response.status === 401) {
+                  localStorage.removeItem('spotifyToken');
+                  navigate('/login');
+                  return Promise.reject('Unauthorized');
+                }
+                return response.json();
+              })
+              .then(userData => {
+                if (userData.images && userData.images.length > 0) {
+                  setProfilePicture(userData.images[0].url);
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching user profile:', error);
+              });
           } else {
             localStorage.removeItem('spotifyToken');
             navigate('/login');
@@ -43,6 +63,25 @@ function App() {
       if (token) {
         localStorage.setItem('spotifyToken', token);
         setIsLoggedIn(true);
+        fetch('https://api.spotify.com/v1/me', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
+          .then(response => {
+            if (response.status === 401) {
+              localStorage.removeItem('spotifyToken');
+              navigate('/login');
+              return Promise.reject('Unauthorized');
+            }
+            return response.json();
+          })
+          .then(userData => {
+            if (userData.images && userData.images.length > 0) {
+              setProfilePicture(userData.images[0].url);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching user profile:', error);
+          });
         navigate('/');
       } else if (error) {
         alert(`Login failed: ${error}`);
@@ -61,7 +100,7 @@ function App() {
           <div className="mx-auto">
             <h1 className="navbar-title">DayBeats</h1>
           </div>
-          <div>
+          <div className="d-flex align-items-center">
             <Button variant="outline-primary" onClick={() => navigate("/calendar")}>
               View Calendar
             </Button>
@@ -73,11 +112,21 @@ function App() {
               onClick={() => {
                 localStorage.removeItem('spotifyToken');
                 setIsLoggedIn(false);
+                setProfilePicture(null);
                 navigate('/login');
               }}
             >
               Logout
             </Button>
+            {profilePicture && (
+              <Image
+                src={profilePicture}
+                alt="Profile"
+                roundedCircle
+                className='profile-image'
+                style={{ width: '40px', height: '40px', marginLeft: '10px' }}
+              />
+            )}
           </div>
           <div style={{ width: "120px" }}></div>
         </Navbar>
