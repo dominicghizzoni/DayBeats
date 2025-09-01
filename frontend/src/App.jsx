@@ -1,6 +1,6 @@
 import './styles/App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Button, Navbar, Image } from 'react-bootstrap'; // Add Image import
+import { Container, Button, Navbar, Image, Dropdown } from 'react-bootstrap'; // Add Image import
 import CalendarPage from './CalendarPage';
 import SongSelect from './SongSelect';
 import Login from './Login';
@@ -118,15 +118,45 @@ function App() {
             >
               Logout
             </Button>
+
             {profilePicture && (
-              <Image
-                src={profilePicture}
-                alt="Profile"
-                roundedCircle
-                className='profile-image'
-                style={{ width: '40px', height: '40px', marginLeft: '10px' }}
-              />
-            )}
+              <Dropdown align="end">
+                <Dropdown.Toggle
+                  variant="link"
+                  id="profile-dropdown"
+                  className="p-0 border-0 bg-transparent"
+                >
+
+                <Image
+                  src={profilePicture}
+                  alt="Profile"
+                  roundedCircle
+                  className='profile-image'
+                  style={{ width: '40px', height: '40px', marginLeft: '10px' }}
+                />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                <Dropdown.Item onClick={() => navigate("/calendar")}>
+                  View Calendar
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => navigate("/")}>
+                  Song Select
+                </Dropdown.Item>
+                <Dropdown.Divider/>
+                <Dropdown.Item
+                  onClick={() => {
+                    localStorage.removeItem("spotifyToken");
+                    setIsLoggedIn(false);
+                    setProfilePicture(null);
+                    navigate("/login");
+                  }}
+                >
+                  Logout
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
+
           </div>
           <div style={{ width: "120px" }}></div>
         </Navbar>
