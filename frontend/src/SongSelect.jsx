@@ -184,18 +184,18 @@ function SongSelect() {
       </Container>
 
       {selectedTrack && topTracks.length > 0 && (
-        <Container>
+        <Container className="recommendations-container">
           <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
-          <Row className="mx-2 row-cols-4 g-3">
+          <div className="custom-row">
             {topTracks.slice(0, 8).map((track, i) => (
-              <Card key={track.id || i} className="m-2">
+              <Card key={track.id || i} className="custom-card">
                 <Card.Img src={track.album.images[0]?.url} />
                 <Card.Body>
                   <Card.Title>{track.name}</Card.Title>
                 </Card.Body>
               </Card>
             ))}
-          </Row>
+          </div>
         </Container>
       )}
     </div>

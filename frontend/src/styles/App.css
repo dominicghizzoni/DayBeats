@@ -7,7 +7,7 @@
   box-sizing: border-box;
   transform-origin: top center;
   transform: scale(calc(min(100vw / 1920, 100vh / 1080)));
-  overflow: hidden;
+  overflow: auto;
   background-color: #212121;
 }
 

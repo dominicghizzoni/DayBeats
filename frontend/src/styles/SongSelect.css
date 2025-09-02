@@ -33,3 +33,38 @@
 .search-bar::placeholder {
   color: #b3b3b3;
 }
+
+/* for search results */
+
+.custom-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.custom-card {
+    max-width: 250px;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-card .card-img {
+    height: 150px;
+    object-fit: cover;
+}
+
+.custom-card .card-body {
+    flex: 1;
+    overflow: hidden;
+}
+
+.recommendations-container {
+    max-height: 600px;
+    overflow-y: auto;
+    margin-top: 20px;
+    padding-bottom: 20px;
+    min-width: 1200px;
+}
