@@ -1,4 +1,5 @@
 import './styles/App.css';
+import './styles/SongSelect.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Button, Navbar, Image, Dropdown } from 'react-bootstrap'; // Add Image import
 import CalendarPage from './CalendarPage';
@@ -101,14 +102,14 @@ function App() {
             <h1 className="navbar-title">DayBeats</h1>
           </div>
           <div className="d-flex align-items-center">
-            <Button variant="outline-primary" onClick={() => navigate("/calendar")}>
+            <Button className='select-btn' onClick={() => navigate("/calendar")}>
               View Calendar
             </Button>
-            <Button variant="outline-primary" onClick={() => navigate("/")}>
+            <Button className='select-btn' onClick={() => navigate("/")}>
               Song Select
             </Button>
             <Button
-              variant="outline-primary"
+              className='select-btn'
               onClick={() => {
                 localStorage.removeItem('spotifyToken');
                 setIsLoggedIn(false);
