@@ -188,7 +188,16 @@ function SongSelect() {
           <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
           <div className="custom-row">
             {topTracks.slice(0, 8).map((track, i) => (
-              <Card key={track.id || i} className="custom-card">
+              <Card 
+                key={track.id || i}
+                className="custom-card"
+                onClick={() => {
+                  setSelectedTrack(track);
+                  setSearchInput(track.name);
+                  setShowSuggestions(false);
+                  search(track.id);
+                }}
+              >
                 <Card.Img src={track.album.images[0]?.url} />
                 <Card.Body>
                   <Card.Title>{track.name}</Card.Title>
