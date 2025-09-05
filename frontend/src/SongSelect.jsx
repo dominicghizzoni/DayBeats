@@ -185,7 +185,7 @@ function SongSelect() {
 
       {selectedTrack && topTracks.length > 0 && (
         <Container className="recommendations-container">
-          <h4 className="mb-3">Other tracks from {selectedTrack.artists[0].name}</h4>
+          <h4 className="mb-3 white-text">Other tracks from {selectedTrack.artists[0].name}</h4>
           <div className="custom-row">
             {topTracks.slice(0, 8).map((track, i) => (
               <Card 
