@@ -70,6 +70,6 @@
   object-fit: cover;
 }
 
-.bar-drop {
-
+.bar-drop::after {
+  border-top-color: #32df6f !important;
 }
