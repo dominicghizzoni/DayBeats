@@ -125,7 +125,7 @@ function App() {
                 <Dropdown.Toggle
                   variant="link"
                   id="profile-dropdown"
-                  className="p-0 border-0 bg-transparent"
+                  className="bar-drop p-0 border-0 bg-transparent"
                 >
 
                 <Image

@@ -51,7 +51,7 @@ function CalendarPage() {
 
   return (
     <div className="d-flex flex-column align-items-center mt-5">
-      <h2>Calendar</h2>
+      <h2 className="white-text">Calendar</h2>
       <Calendar
         onChange={setValue}
         value={value}
