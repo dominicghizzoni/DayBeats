@@ -13,6 +13,7 @@ function SongSelect() {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('spotifyToken');
@@ -25,7 +26,7 @@ function SongSelect() {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if (searchInput.length > 0 && accessToken) {
+      if (searchInput.length > 0 && accessToken && isTyping) {
         fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchInput)}&type=track&limit=5`, {
           headers: {
             'Authorization': 'Bearer ' + accessToken
@@ -51,13 +52,14 @@ function SongSelect() {
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchInput, accessToken, navigate]);
+  }, [searchInput, accessToken, isTyping, navigate]);
 
   async function search(trackID) {
     if (!trackID) return;
 
     setSuggestions([]);
     setShowSuggestions(false);
+    setIsTyping(false);
 
     const searchHeaders = {
       method: 'GET',
@@ -139,24 +141,41 @@ function SongSelect() {
             placeholder="Search For Song"
             value={searchInput}
             onChange={event => {
+              setIsTyping(true);
               setSearchInput(event.target.value);
-              setSelectedTrack(null);
             }}
             onFocus={() => setShowSuggestions(true)}
             onKeyDown={event => {
               if (event.key === 'Enter') {
                 event.preventDefault();
                 const topSuggestion = suggestions[0];
-                if (topSuggestion) {
-                  setSearchInput(topSuggestion.name);
+                if (selectedTrack) {
+                  search(selectedTrack.id);
+                } else if (topSuggestion) {
                   setSelectedTrack(topSuggestion);
+                  setSearchInput(topSuggestion.name);
                   search(topSuggestion.id);
-                  setShowSuggestions(false);
                 }
+                setShowSuggestions(false);
+                setIsTyping(false);
               }
             }}
           />
-          <Button className="search-btn" onClick={() => selectedTrack && search(selectedTrack.id)}>
+          <Button
+            className="search-btn"
+            onClick={() => {
+              setShowSuggestions(false);
+              setIsTyping(false);
+              if (selectedTrack) {
+                search(selectedTrack.id);
+              } else if (suggestions.length > 0) {
+                const topSuggestion = suggestions[0];
+                setSelectedTrack(topSuggestion);
+                setSearchInput(topSuggestion.name);
+                search(topSuggestion.id);
+              }
+            }}
+          >
             Search
           </Button>
         </InputGroup>
@@ -171,6 +190,7 @@ function SongSelect() {
                   setSearchInput(track.name);
                   setSuggestions([]);
                   setShowSuggestions(false);
+                  setIsTyping(false);
                   search(track.id);
                 }}
                 className="p-2 hover-bg-light border-bottom"
@@ -195,6 +215,7 @@ function SongSelect() {
                   setSelectedTrack(track);
                   setSearchInput(track.name);
                   setShowSuggestions(false);
+                  setIsTyping(false);
                   search(track.id);
                 }}
               >
