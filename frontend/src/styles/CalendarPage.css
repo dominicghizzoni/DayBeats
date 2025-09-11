@@ -2,6 +2,31 @@
   width: 80% !important;
   height: 600px;
   font-size: 2.0rem;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.react-calendar__tile {
+  background-color: black !important;
+  color: white !important;
+}
+
+.react-calendar__tile:hover {
+  background-color: #333 !important;
+}
+
+.react-calendar__tile--active {
+  background-color: #555 !important;
+  color: white !important;
+}
+
+.react-calendar__navigation button {
+  color: white !important;
+  background-color: black !important;
+}
+
+.react-calendar__month-view__weekdays {
+  color: white !important;
 }
 
 .white-text {
