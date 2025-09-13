@@ -130,6 +130,29 @@ def verify_token():
         return jsonify({'valid': True})
     return jsonify({'valid': False}), 401
 
+@app.route('/refresh-token', methods=['GET'])
+def refresh_token():
+    refresh_token = session.get('refresh_token')
+    if not refresh_token:
+        return jsonify({'error': 'No refresh token available'}), 401
+    
+    response = requests.post(
+        TOKEN_URL,
+        data={
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    token_info = response.json()
+    if 'access_token' in token_info:
+        session['access_token'] = token_info['access_token']
+        session['expires_at'] = datetime.now(timezone.utc).timestamp() + token_info['expires_in']
+        return jsonify({'access_token': token_info['access_token']})
+    return jsonify({'error': 'Failed to refresh token'}), 401
+
 @app.route('/api/save-song', methods=['POST'])
 def save_song():
     token = request.headers.get('Authorization', '').replace('Bearer ', '')

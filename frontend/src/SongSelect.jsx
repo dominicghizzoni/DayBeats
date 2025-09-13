@@ -99,8 +99,69 @@ function SongSelect() {
     }
   }
 
-  function handle(track) {
-    navigate("/calendar", { state: { selectedTrack: track } });
+  async function handle(track) {
+    const token = localStorage.getItem('spotifyToken');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/save-song', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          track_id: track.id,
+          track_name: track.name,
+          artist_name: track.artists[0].name,
+          album_image_url: track.album.images[0]?.url
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        navigate("/calendar", { state: { selectedTrack: track } });
+      } else if (res.status === 401) {
+        const refreshRes = await fetch('http://localhost:5000/refresh-token');
+        const refreshData = await refreshRes.json();
+        if (refreshRes.ok && refreshData.access_token) {
+          localStorage.setItem('spotifyToken', refreshData.access_token);
+          const retryRes = await fetch('http://localhost:5000/api/save-song', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${refreshData.access_token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              track_id: track.id,
+              track_name: track.name,
+              artist_name: track.artists[0].name,
+              album_image_url: track.album.images[0]?.url
+            })
+          });
+          const retryData = await retryRes.json();
+          if (retryRes.ok && retryData.success) {
+            navigate("/calendar", { state: { selectedTrack: track } });
+          } else {
+            console.error("Failed to save song after token refresh:", retryData.error);
+            localStorage.removeItem('spotifyToken');
+            navigate('/login');
+          }
+        } else {
+          console.error("Failed to refresh token:", refreshData.error);
+          localStorage.removeItem('spotifyToken');
+          navigate('/login');
+        }
+      } else {
+        console.error("Failed to save song:", data.error);
+      }
+    } catch (err) {
+      console.error("Error saving song:", err);
+      navigate('/login');
+    }
   }
 
   return (
