@@ -32,3 +32,12 @@
 .white-text {
   color: #ffffff;
 }
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #ffffff;
+  font-size: 1.2rem;
+}

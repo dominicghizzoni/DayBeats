@@ -25,11 +25,13 @@ function ErrorBoundary({ children }) {
 function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [value, setValue] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(true); // New loading state
   const location = useLocation();
   const navigate = useNavigate();
   const selectedTrack = location.state?.selectedTrack || null;
 
   const fetchCalendarData = async (token) => {
+    setIsLoading(true); // Set loading to true at the start
     try {
       const res = await fetch('http://localhost:5000/api/calendar', {
         headers: {
@@ -38,10 +40,12 @@ function CalendarPage() {
       });
       if (!res.ok) {
         if (res.status === 401) {
+          // Try to refresh the token
           const refreshRes = await fetch('http://localhost:5000/refresh-token');
           const refreshData = await refreshRes.json();
           if (refreshRes.ok && refreshData.access_token) {
             localStorage.setItem('spotifyToken', refreshData.access_token);
+            // Retry the calendar fetch with the new token
             const retryRes = await fetch('http://localhost:5000/api/calendar', {
               headers: {
                 'Authorization': `Bearer ${refreshData.access_token}`
@@ -77,6 +81,8 @@ function CalendarPage() {
     } catch (err) {
       console.error("Error fetching calendar data:", err);
       setEvents([]);
+    } finally {
+      setIsLoading(false); // Set loading to false when done
     }
   };
 
@@ -87,6 +93,7 @@ function CalendarPage() {
     } else {
       console.error("No Spotify token found in localStorage");
       navigate('/login');
+      setIsLoading(false); // Ensure loading is false if no token
     }
   }, [navigate]);
 
@@ -94,15 +101,14 @@ function CalendarPage() {
     if (view === 'month') {
       const dateStr = date.toISOString().split('T')[0];
       const todayStr = new Date().toISOString().split('T')[0];
-
       const match = events.find(e => e.date === dateStr);
-      
-      if (dateStr === todayStr && (match?.album_image_url || (selectedTrack && selectedTrack.album?.images[0]?.url))) {
-        const imageUrl = match?.album_image_url || selectedTrack.album.images[0].url;
+
+      // Render album cover art for any date with a saved song that has an image
+      if (match?.album_image_url) {
         return (
           <div style={{ height: '100%', width: '100%' }}>
             <img
-              src={imageUrl}
+              src={match.album_image_url}
               alt="Album Cover"
               style={{
                 width: '100%',
@@ -115,6 +121,25 @@ function CalendarPage() {
         );
       }
 
+      // Fallback to selectedTrack for today's date if no match is found
+      if (dateStr === todayStr && selectedTrack?.album?.images[0]?.url) {
+        return (
+          <div style={{ height: '100%', width: '100%' }}>
+            <img
+              src={selectedTrack.album.images[0].url}
+              alt="Album Cover"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: '4px'
+              }}
+            />
+          </div>
+        );
+      }
+
+      // Fallback to track name for any date with a saved song but no image
       if (match) {
         return <p style={{ fontSize: '0.6rem', color: 'blue' }}>{match.track_name}</p>;
       }
@@ -125,13 +150,19 @@ function CalendarPage() {
   return (
     <div className="d-flex flex-column align-items-center mt-5">
       <h2 className="white-text">Calendar</h2>
-      <ErrorBoundary>
-        <Calendar
-          onChange={setValue}
-          value={value}
-          tileContent={tileContent}
-        />
-      </ErrorBoundary>
+      {isLoading ? (
+        <div className="loading-indicator">
+          <p>Loading calendar...</p>
+        </div>
+      ) : (
+        <ErrorBoundary>
+          <Calendar
+            onChange={setValue}
+            value={value}
+            tileContent={tileContent}
+          />
+        </ErrorBoundary>
+      )}
     </div>
   );
 }
