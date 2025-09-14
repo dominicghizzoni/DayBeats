@@ -25,13 +25,13 @@ function ErrorBoundary({ children }) {
 function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [value, setValue] = useState(new Date());
-  const [isLoading, setIsLoading] = useState(true); // New loading state
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const selectedTrack = location.state?.selectedTrack || null;
 
   const fetchCalendarData = async (token) => {
-    setIsLoading(true); // Set loading to true at the start
+    setIsLoading(true);
     try {
       const res = await fetch('http://localhost:5000/api/calendar', {
         headers: {
@@ -40,7 +40,6 @@ function CalendarPage() {
       });
       if (!res.ok) {
         if (res.status === 401) {
-          // Try to refresh the token
           const refreshRes = await fetch('http://localhost:5000/refresh-token');
           const refreshData = await refreshRes.json();
           if (refreshRes.ok && refreshData.access_token) {

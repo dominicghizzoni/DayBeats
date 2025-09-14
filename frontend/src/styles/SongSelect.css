@@ -78,3 +78,26 @@
     color: #ffffff;
     margin-left: 10px;
 }
+
+.custom-card,
+.selected-card {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.custom-card .card-title,
+.selected-card .card-title {
+  color: #ffffff !important;
+}
+
+.custom-card .btn,
+.selected-card .btn {
+  background-color: #1db954;
+  color: #ffffff;
+  border: none;
+}
+
+.custom-card .btn:hover,
+.selected-card .btn:hover {
+  background-color: #1aa34a;
+}
