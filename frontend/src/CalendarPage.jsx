@@ -44,7 +44,7 @@ function CalendarPage() {
           const refreshData = await refreshRes.json();
           if (refreshRes.ok && refreshData.access_token) {
             localStorage.setItem('spotifyToken', refreshData.access_token);
-            // Retry the calendar fetch with the new token
+
             const retryRes = await fetch('http://localhost:5000/api/calendar', {
               headers: {
                 'Authorization': `Bearer ${refreshData.access_token}`
@@ -81,7 +81,7 @@ function CalendarPage() {
       console.error("Error fetching calendar data:", err);
       setEvents([]);
     } finally {
-      setIsLoading(false); // Set loading to false when done
+      setIsLoading(false);
     }
   };
 
@@ -92,7 +92,7 @@ function CalendarPage() {
     } else {
       console.error("No Spotify token found in localStorage");
       navigate('/login');
-      setIsLoading(false); // Ensure loading is false if no token
+      setIsLoading(false);
     }
   }, [navigate]);
 
@@ -102,7 +102,6 @@ function CalendarPage() {
       const todayStr = new Date().toISOString().split('T')[0];
       const match = events.find(e => e.date === dateStr);
 
-      // Render album cover art for any date with a saved song that has an image
       if (match?.album_image_url) {
         return (
           <div style={{ height: '100%', width: '100%' }}>
@@ -120,7 +119,6 @@ function CalendarPage() {
         );
       }
 
-      // Fallback to selectedTrack for today's date if no match is found
       if (dateStr === todayStr && selectedTrack?.album?.images[0]?.url) {
         return (
           <div style={{ height: '100%', width: '100%' }}>
@@ -138,7 +136,6 @@ function CalendarPage() {
         );
       }
 
-      // Fallback to track name for any date with a saved song but no image
       if (match) {
         return <p style={{ fontSize: '0.6rem', color: 'blue' }}>{match.track_name}</p>;
       }
