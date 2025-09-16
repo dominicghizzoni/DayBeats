@@ -108,17 +108,6 @@ function App() {
             <Button className="select-btn" onClick={() => navigate("/")}>
               Song Select
             </Button>
-            <Button
-              className="select-btn"
-              onClick={() => {
-                localStorage.removeItem('spotifyToken');
-                setIsLoggedIn(false);
-                setProfilePicture(null);
-                navigate('/login');
-              }}
-            >
-              Logout
-            </Button>
 
             {profilePicture && (
               <Dropdown align="end">
