@@ -126,13 +126,6 @@ function App() {
                 />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                <Dropdown.Item onClick={() => navigate("/calendar")}>
-                  View Calendar
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => navigate("/")}>
-                  Song Select
-                </Dropdown.Item>
-                <Dropdown.Divider/>
                 <Dropdown.Item
                   onClick={() => {
                     localStorage.removeItem("spotifyToken");
