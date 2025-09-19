@@ -26,6 +26,7 @@ function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [value, setValue] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedSong, setSelectedSong] = useState(null); // 👈 new
   const location = useLocation();
   const navigate = useNavigate();
   const selectedTrack = location.state?.selectedTrack || null;
@@ -44,38 +45,19 @@ function CalendarPage() {
           const refreshData = await refreshRes.json();
           if (refreshRes.ok && refreshData.access_token) {
             localStorage.setItem('spotifyToken', refreshData.access_token);
-
             const retryRes = await fetch('http://localhost:5000/api/calendar', {
-              headers: {
-                'Authorization': `Bearer ${refreshData.access_token}`
-              }
+              headers: { 'Authorization': `Bearer ${refreshData.access_token}` }
             });
-            if (!retryRes.ok) {
-              throw new Error(`HTTP error! Status: ${retryRes.status}`);
-            }
             const data = await retryRes.json();
-            if (Array.isArray(data)) {
-              setEvents(data);
-            } else {
-              console.error("Received non-array data from /api/calendar:", data);
-              setEvents([]);
-            }
+            setEvents(Array.isArray(data) ? data : []);
           } else {
-            console.error("Failed to refresh token:", refreshData.error);
             localStorage.removeItem('spotifyToken');
             navigate('/login');
           }
-        } else {
-          throw new Error(`HTTP error! Status: ${res.status}`);
         }
       } else {
         const data = await res.json();
-        if (Array.isArray(data)) {
-          setEvents(data);
-        } else {
-          console.error("Received non-array data from /api/calendar:", data);
-          setEvents([]);
-        }
+        setEvents(Array.isArray(data) ? data : []);
       }
     } catch (err) {
       console.error("Error fetching calendar data:", err);
@@ -90,7 +72,6 @@ function CalendarPage() {
     if (token) {
       fetchCalendarData(token);
     } else {
-      console.error("No Spotify token found in localStorage");
       navigate('/login');
       setIsLoading(false);
     }
@@ -143,6 +124,16 @@ function CalendarPage() {
     return null;
   };
 
+  const handleDayClick = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    const match = events.find(e => e.date === dateStr);
+    if (match) {
+      setSelectedSong(match);
+    } else {
+      setSelectedSong(null);
+    }
+  };
+
   return (
     <div className="d-flex flex-column align-items-center mt-5">
       <h2 className="white-text">Calendar</h2>
@@ -156,8 +147,30 @@ function CalendarPage() {
             onChange={setValue}
             value={value}
             tileContent={tileContent}
+            onClickDay={handleDayClick}
           />
         </ErrorBoundary>
+      )}
+
+      {selectedSong && (
+        <div className="song-card">
+          <button
+            className="close-button"
+            onClick={() => setSelectedSong(null)}
+          >
+            &times;
+          </button>
+          <iframe
+            src={`https://open.spotify.com/embed/track/${selectedSong.track_id}`}
+            width="100%"
+            height="80"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            title="Spotify Player"
+            style={{ borderRadius: "8px", marginTop: "10px" }}
+          ></iframe>
+
+        </div>
       )}
     </div>
   );

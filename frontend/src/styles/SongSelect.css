@@ -101,3 +101,8 @@
 .selected-card .btn:hover {
   background-color: #1aa34a;
 }
+
+.selected-card {
+  background-color: #000000 !important;
+  color: white;
+}
