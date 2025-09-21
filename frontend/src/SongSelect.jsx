@@ -170,41 +170,19 @@ function SongSelect() {
         {selectedTrack && (
           <Card className="mb-3 selected-card">
             <Row className="g-0">
-              <Col md={4}>
-                <Card.Img
-                  src={selectedTrack.album.images[0]?.url}
-                  alt="Track Cover"
-                  style={{ height: '100%', objectFit: 'cover' }}
-                />
-              </Col>
-              <Col md={8} className="d-flex align-items-center">
               <Card.Body>
-                <Card.Title>{selectedTrack.name}</Card.Title>
-                <Card.Text>
-                  <strong>Artists:</strong>{" "}
-                  {selectedTrack.artists.map(artist => artist.name).join(', ')}<br />
-                  <strong>Runtime:</strong>{" "}
-                  {Math.floor(selectedTrack.duration_ms / 60000)}:
-                  {(Math.floor(selectedTrack.duration_ms / 1000) % 60).toString().padStart(2, '0')} minutes
-                </Card.Text>
-
-                {/* Spotify Embed Player */}
                 <iframe
                   src={`https://open.spotify.com/embed/track/${selectedTrack.id}`}
                   width="100%"
-                  height="80"
-                  frameBorder="0"
+                  height="360"
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                   title="Spotify Player"
                   style={{ borderRadius: "8px", marginTop: "10px" }}
                 ></iframe>
-
                 <Button className="select-btn" onClick={() => handle(selectedTrack)}>
                   Select
                 </Button>
               </Card.Body>
-
-              </Col>
             </Row>
           </Card>
         )}
