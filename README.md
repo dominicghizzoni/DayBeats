@@ -8,3 +8,5 @@ python backend
 react javascript frontend
 
 tailwind css
+
+instructions for setup coming soon
